@@ -15,6 +15,9 @@ module.exports = function (grunt) {
   // Time how long tasks take. Can help when optimizing build times
   require('time-grunt')(grunt);
 
+  grunt.loadNpmTasks('grunt-mocha-test');
+  grunt.loadNpmTasks('grunt-karma');
+
   // Define the configuration for all the tasks
   grunt.initConfig({
 
@@ -55,8 +58,8 @@ module.exports = function (grunt) {
         }
       },
       jsTest: {
-        files: ['test/spec/{,*/}*.js'],
-        tasks: ['newer:jshint:test']
+        files: ['test/spec/{,*/}*-test.js'],
+        tasks: ['newer:jshint:test', 'mochaTest']
       },
       compass: {
         files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
@@ -66,8 +69,8 @@ module.exports = function (grunt) {
         files: ['Gruntfile.js']
       },
       karma: {
-          files: ['app/scripts/**/*.js', 'test/spec/**/*.js'],
-          tasks: ['karma:unit:run'] //NOTE the :run flag
+          files: ['app/scripts/**/*.js', 'test/spec/client/**/*.js'],
+          tasks: ['karma:unit:run']
       },
       livereload: {
         files: [
@@ -86,7 +89,7 @@ module.exports = function (grunt) {
           'server.js',
           'lib/**/*.{js,json}'
         ],
-        tasks: ['newer:jshint:server', 'express:dev', 'wait'],
+        tasks: ['newer:jshint:server', 'express:dev', 'wait', 'mochaTest'],
         options: {
           livereload: true,
           nospawn: true //Without this option specified express won't be reloaded
@@ -378,11 +381,36 @@ module.exports = function (grunt) {
     // },
 
     // Test settings
-    karma: {
-      unit: {
-        configFile: 'karma.conf.js',
-        background: true
+
+      karma: {
+          unit: {
+              configFile: 'karma.conf.js',
+              background: true
+          }
+      },
+      mochaTest: {
+          test: {
+              options: {
+                  globals: ['should'],
+                  timeout: 3000,
+                  ignoreLeaks: false,
+                  ui: 'bdd',
+                  reporter: 'dot',
+                  clearRequireCache: true
+              },
+
+              src: 'test/spec/server/**/*-test.js'
+          }
       }
+  });
+
+  // On watch events, if the changed file is a test file then configure mochaTest to only
+  // run the tests from that file. Otherwise run all the tests
+  var defaultTestSrc = grunt.config('mochaTest.test.src');
+  grunt.event.on('watch', function(action, filepath) {
+    grunt.config('mochaTest.test.src', defaultTestSrc);
+    if (filepath.match('test/')) {
+      grunt.config('mochaTest.test.src', filepath);
     }
   });
 
@@ -396,6 +424,15 @@ module.exports = function (grunt) {
       grunt.log.writeln('Done waiting!');
       done();
     }, 500);
+  });
+
+  grunt.registerTask('wait-long', function () {
+      grunt.log.ok('Waiting a bit longer for Karma server to start and capture a browser...');
+      var done = this.async();
+      setTimeout(function () {
+          grunt.log.writeln('Ok, done!');
+          done();
+      }, 3000);
   });
 
   grunt.registerTask('express-keepalive', 'Keep grunt running', function() {
@@ -427,7 +464,13 @@ module.exports = function (grunt) {
   grunt.registerTask('test', [
     'clean:server',
     'concurrent:test',
-    'autoprefixer'
+    'autoprefixer',
+    'express:dev',
+    'wait',
+    'mochaTest',
+    'karma:unit:start',
+    'wait-long',
+    'karma:unit:run'
   ]);
 
   grunt.registerTask('build', [
