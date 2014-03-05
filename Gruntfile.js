@@ -391,7 +391,7 @@ module.exports = function (grunt) {
       mochaTest: {
           test: {
               options: {
-                  globals: ['should'],
+                  assertion: 'chai',
                   timeout: 3000,
                   ignoreLeaks: false,
                   ui: 'bdd',
