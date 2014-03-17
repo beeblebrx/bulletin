@@ -58,7 +58,7 @@ module.exports = function (grunt) {
                 }
             },
             jsTest: {
-                files: ['test/spec/{,*/}*-test.js'],
+                files: ['test/spec/**/*-test.js'],
                 tasks: ['newer:jshint:test', 'mochaTest']
             },
             compass: {
