@@ -73,8 +73,9 @@ describe('Bulletin API', function() {
         });
     });
     
+    var bulletinToDelete;
+
     describe('POST /api/bulletins/create', function() {
-        var bulletinToDelete;
         
         it('should create a new bulletin', function(done) {
             request(HOST)
@@ -123,6 +124,22 @@ describe('Bulletin API', function() {
                         }
                         done();
                     });
+        });
+    });
+
+    describe('DELETE /api/bulletins', function() {
+
+        it('should delete bulletins', function(done) {
+            request(HOST)
+                .del('/api/bulletins/' + bulletinToDelete)
+                .expect(204)
+                .end(function(err) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    done();
+                });
         });
     });
 });
