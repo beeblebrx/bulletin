@@ -7,6 +7,8 @@ var request = require('supertest'),
     fs = require('fs'),
     should = require('chai').should();
 
+var HOST = 'http://localhost:9000';
+
 function checkResponseHasThreeBulletins(response) {
     if (response.body.length !== 3) {
         return 'Expected 3 bulletins, instead got ' + response.body.length;
@@ -43,7 +45,7 @@ describe('Bulletin API', function() {
         var bulletins;
 
         it('should return 3 bulletin JSON objects', function(done) {
-            request('http://localhost:9000')
+            request(HOST)
                 .get('/api/bulletins/all')
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
@@ -69,24 +71,30 @@ describe('Bulletin API', function() {
                 bulletins[i].should.have.property('text');
             }
         });
-
-        it('should be possible to add new bulletins by sending JSON POST to /api/bulletins', function(done) {
-            request('http://localhost:9000')
+    });
+    
+    describe('POST /api/bulletins/create', function() {
+        var bulletinToDelete;
+        
+        it('should create a new bulletin', function(done) {
+            request(HOST)
                 .post('/api/bulletins/create')
                 .set('Accept', 'application/json')
                 .set('Content-Type', 'application/json')
                 .send({title:'Test bulletin',text:'Test text'})
                 .expect(201)
-                .end(function(err) {
+                .end(function(err, res) {
                         if (err) {
                             return done(err);
                         }
+                        bulletinToDelete = res.body.id;
+                        bulletinToDelete.should.have.lengthOf(20);
                         done();
                     });
         });
 
-        it('should validate title for length and return 400 on too long titles', function(done) {
-            request('http://localhost:9000')
+        it('should validate bulletin title for length and return 400 on too long titles', function(done) {
+            request(HOST)
                 .post('/api/bulletins/create')
                 .set('Accept', 'application/json')
                 .set('Content-Type', 'application/json')
@@ -101,8 +109,8 @@ describe('Bulletin API', function() {
                     });
         });
 
-        it('should validate text for length and return 400 on too long texts', function(done) {
-            request('http://localhost:9000')
+        it('should validate bulletin text for length and return 400 on too long texts', function(done) {
+            request(HOST)
                 .post('/api/bulletins/create')
                 .set('Accept', 'application/json')
                 .set('Content-Type', 'application/json')
