@@ -8,10 +8,17 @@ var request = require('supertest'),
     should = require('chai').should();
 
 var HOST = 'http://localhost:9000';
+var BULLETIN = {title:'Test bulletin',text:'Test text'};
 
 function checkResponseHasThreeBulletins(response) {
     if (response.body.length !== 3) {
         return 'Expected 3 bulletins, instead got ' + response.body.length;
+    }
+}
+
+function checkBulletin(response) {
+    if (response.body.title !== BULLETIN.title  || response.body.text !== BULLETIN.text) {
+        return 'Received bulletin does not match the one we sent!';
     }
 }
 
@@ -73,7 +80,7 @@ describe('Bulletin API', function() {
         });
     });
     
-    var bulletinToDelete;
+    var createdBulletin;
 
     describe('POST /api/bulletins/create', function() {
         
@@ -82,14 +89,14 @@ describe('Bulletin API', function() {
                 .post('/api/bulletins/create')
                 .set('Accept', 'application/json')
                 .set('Content-Type', 'application/json')
-                .send({title:'Test bulletin',text:'Test text'})
+                .send(BULLETIN)
                 .expect(201)
                 .end(function(err, res) {
                         if (err) {
                             return done(err);
                         }
-                        bulletinToDelete = res.body.id;
-                        bulletinToDelete.should.have.lengthOf(20);
+                        createdBulletin = res.body.id;
+                        createdBulletin.should.have.lengthOf(20);
                         done();
                     });
         });
@@ -127,11 +134,29 @@ describe('Bulletin API', function() {
         });
     });
 
+    describe('GET /api/bulletins/:id', function() {
+        it('should return the bulletin we created earlier', function(done) {
+            request(HOST)
+                .get('/api/bulletins/' + createdBulletin)
+                .set('Content-Type', 'application/json')
+                .expect(200)
+                .expect('Content-Type', /json/)
+                .expect(checkBulletin)
+                .end(function(err) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    done();
+                });
+        });
+    });
+
     describe('DELETE /api/bulletins', function() {
 
         it('should delete bulletins', function(done) {
             request(HOST)
-                .del('/api/bulletins/' + bulletinToDelete)
+                .del('/api/bulletins/' + createdBulletin)
                 .expect(204)
                 .end(function(err) {
                     if (err) {
