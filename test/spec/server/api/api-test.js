@@ -10,15 +10,18 @@ var request = require('supertest'),
 var HOST = 'http://localhost:9000';
 var BULLETIN = {title:'Test bulletin',text:'Test text'};
 
-function checkResponseHasThreeBulletins(response) {
-    if (response.body.length !== 3) {
-        return 'Expected 3 bulletins, instead got ' + response.body.length;
+function checkBulletinHasIdTitleAndText(bulletin) {
+    if (bulletin === null || bulletin === undefined) {
+        throw new Error('Bulletin is null or undefined!');
     }
-}
 
-function checkBulletin(response) {
-    if (response.body.title !== BULLETIN.title  || response.body.text !== BULLETIN.text) {
-        return 'Received bulletin does not match the one we sent!';
+    if (Object.getOwnPropertyNames(bulletin).length < 3 ||
+        !bulletin.title || !bulletin.text || !bulletin.id) {
+        throw new Error('Received bulleting is missing something');
+    }
+
+    if (Object.getOwnPropertyNames(bulletin).length > 3) {
+        throw new Error('The bulletin has too many properties!');
     }
 }
 
@@ -56,26 +59,21 @@ describe('Bulletin API', function() {
                 .get('/api/bulletins/all')
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
-                .expect(checkResponseHasThreeBulletins)
                 .expect(200)
                 .end(function(err, response) {
                     if (err) {
                         return done(err);
                     }
+
+                    response.body.should.have.lengthOf(3);
                     bulletins = response.body;
                     done();
                 });
         });
 
-        it('bulletins should have a title property', function() {
+        it('bulletins should have an id, a title and a text property and nothing else', function() {
             for (var i = 0; i < bulletins.length; i++) {
-                bulletins[i].should.have.property('title');
-            }
-        });
-
-        it('bulletins should have a text property', function() {
-            for (var i = 0; i < bulletins.length; i++) {
-                bulletins[i].should.have.property('text');
+                checkBulletinHasIdTitleAndText(bulletins[i]);
             }
         });
     });
@@ -135,18 +133,95 @@ describe('Bulletin API', function() {
     });
 
     describe('GET /api/bulletins/:id', function() {
+
         it('should return the bulletin we created earlier', function(done) {
             request(HOST)
                 .get('/api/bulletins/' + createdBulletin)
-                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
                 .expect(200)
                 .expect('Content-Type', /json/)
-                .expect(checkBulletin)
-                .end(function(err) {
+                .end(function(err, res) {
                     if (err) {
                         return done(err);
                     }
 
+                    res.body.should.have.a.property('title');
+                    res.body.should.have.a.property('text');
+                    res.body.title.should.equal(BULLETIN.title);
+                    res.body.text.should.equal(BULLETIN.text);
+                    done();
+                });
+        });
+    });
+
+    describe('PUT /api/bulletins', function() {
+
+        var updatedBulletinLocation1;
+        it('should update bulletin title', function(done) {
+            request(HOST)
+                .put('/api/bulletins/' + createdBulletin)
+                .set('Content-Type', 'application/json')
+                .send('{"title":"Updated title"}')
+                .expect(303)
+                .expect('Location', '/api/bulletins/' + createdBulletin)
+                .end(function(err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    updatedBulletinLocation1 = res.headers.location;
+                    done();
+                });
+        });
+
+        it('should have updated title', function(done) {
+            request(HOST)
+                .get(updatedBulletinLocation1)
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end(function(err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    checkBulletinHasIdTitleAndText(res.body);
+                    res.body.title.should.equal('Updated title');
+                    done();
+                });
+        });
+
+        var updatedBulletinLocation2;
+        it('should update bulletin text', function(done) {
+            request(HOST)
+                .put('/api/bulletins/' + createdBulletin)
+                .set('Content-Type', 'application/json')
+                .send('{"text":"Updated text"}')
+                .expect(303)
+                .expect('Location', '/api/bulletins/' + createdBulletin)
+                .end(function(err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    updatedBulletinLocation2 = res.headers.location;
+                    done();
+                });
+        });
+
+        it('should have updated text', function(done) {
+            request(HOST)
+                .get(updatedBulletinLocation2)
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end(function(err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    checkBulletinHasIdTitleAndText(res.body);
+                    res.body.text.should.equal('Updated text');
                     done();
                 });
         });
