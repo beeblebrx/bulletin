@@ -11,14 +11,12 @@ var HOST = 'http://localhost:9000';
 var BULLETIN = {title:'Test bulletin',text:'Test text'};
 
 function checkBulletinHasIdTitleAndText(bulletin) {
-    if (bulletin === null || bulletin === undefined) {
-        throw new Error('Bulletin is null or undefined!');
-    }
-
-    if (Object.getOwnPropertyNames(bulletin).length < 3 ||
-        !bulletin.title || !bulletin.text || !bulletin.id) {
-        throw new Error('Received bulleting is missing something');
-    }
+    /* jshint -W030 */
+    bulletin.should.exist;
+    /* jshint +W030 */
+    bulletin.should.have.a.property('title');
+    bulletin.should.have.a.property('text');
+    bulletin.should.have.a.property('id');
 
     if (Object.getOwnPropertyNames(bulletin).length > 3) {
         throw new Error('The bulletin has too many properties!');
@@ -145,6 +143,7 @@ describe('Bulletin API', function() {
                         return done(err);
                     }
 
+                    res.body.should.have.a.property('id');
                     res.body.should.have.a.property('title');
                     res.body.should.have.a.property('text');
                     res.body.title.should.equal(BULLETIN.title);
