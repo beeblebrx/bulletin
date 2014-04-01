@@ -70,6 +70,7 @@ describe('Bulletin API', function() {
         });
 
         it('bulletins should have an id, a title and a text property and nothing else', function() {
+            bulletins.should.exist;
             for (var i = 0; i < bulletins.length; i++) {
                 checkBulletinHasIdTitleAndText(bulletins[i]);
             }
