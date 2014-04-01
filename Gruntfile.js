@@ -107,16 +107,13 @@ module.exports = function (grunt) {
                 options: {
                     jshintrc: 'lib/.jshintrc'
                 },
-                src: [ 'lib/{,*/}*.js']
+                src: [ 'lib/**/*.js']
             },
             all: [
-                '<%= yeoman.app %>/scripts/{,*/}*.js'
+                '<%= yeoman.app %>/scripts/**/*.js'
             ],
             test: {
-                options: {
-                    jshintrc: 'test/.jshintrc'
-                },
-                src: ['test/spec/{,*/}*.js']
+                src: ['test/spec/**/*.js']
             }
         },
 
