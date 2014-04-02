@@ -7,7 +7,7 @@ var request = require('supertest'),
     fs = require('fs'),
     should = require('chai').should();
 
-var HOST = 'http://localhost:9000';
+var HOST = 'http://localhost:' + process.env.PORT;
 var BULLETIN = {title:'Test bulletin',text:'Test text'};
 
 function checkBulletinHasIdTitleAndText(bulletin) {
