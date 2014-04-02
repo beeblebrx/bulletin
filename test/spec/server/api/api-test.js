@@ -49,12 +49,12 @@ describe('Bulletin API', function() {
         testBulletins(done);
     });
 
-    describe('GET /api/bulletins/all', function() {
+    describe('GET /api/bulletins/', function() {
         var bulletins;
 
         it('should return 3 bulletin JSON objects', function(done) {
             request(HOST)
-                .get('/api/bulletins/all')
+                .get('/api/bulletins/')
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(200)
@@ -81,12 +81,12 @@ describe('Bulletin API', function() {
     
     var createdBulletin;
 
-    describe('POST /api/bulletins/create', function() {
+    describe('POST /api/bulletins/', function() {
         
         it('should create a new bulletin', function(done) {
             var locationRegex = /\/api\/bulletins\/(\w+)/;
             request(HOST)
-                .post('/api/bulletins/create')
+                .post('/api/bulletins/')
                 .set('Content-Type', 'application/json')
                 .send(BULLETIN)
                 .expect(201)
@@ -104,7 +104,7 @@ describe('Bulletin API', function() {
 
         it('should validate bulletin title for length and return 400 on too long titles', function(done) {
             request(HOST)
-                .post('/api/bulletins/create')
+                .post('/api/bulletins/')
                 .set('Content-Type', 'application/json')
                 .send({title:'12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901', // 101 chars
                        text:'Test text'})
@@ -119,7 +119,7 @@ describe('Bulletin API', function() {
 
         it('should validate bulletin text for length and return 400 on too long texts', function(done) {
             request(HOST)
-                .post('/api/bulletins/create')
+                .post('/api/bulletins/')
                 .set('Content-Type', 'application/json')
                 .send({title:'Title',
                        text:'123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901'}) // 2001 chars
@@ -240,6 +240,54 @@ describe('Bulletin API', function() {
                         return done(err);
                     }
 
+                    done();
+                });
+        });
+    });
+
+    describe('Call /api/bulletins/ using wrong HTTP verbs', function() {
+
+        it('should return 405 if we PUT to /api/bulletins/', function(done) {
+            request(HOST)
+                .put('/api/bulletins/')
+                .send('{"title":"New bulletin", "text":"New text"}')
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(405)
+                .end(function(err) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    done();
+                });
+        });
+
+        it('should return 405 if we send DELETE to /api/bulletins/', function(done) {
+            request(HOST)
+                .del('/api/bulletins/')
+                .expect(405)
+                .end(function(err) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    done();
+                });
+        });
+
+        it('should return 3 bulletins', function(done) {
+            request(HOST)
+                .get('/api/bulletins/')
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end(function(err, response) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    response.body.should.have.lengthOf(3);
                     done();
                 });
         });
