@@ -69,7 +69,7 @@ describe('Bulletin API', function() {
                 });
         });
 
-        it('bulletins should have an id, a title and a text property and nothing else', function() {
+        it('should have an id, a title and a text property for each bulletin and nothing else', function() {
             /* jshint -W030 */
             bulletins.should.exist;
             /* jshint +W030 */
@@ -83,7 +83,7 @@ describe('Bulletin API', function() {
 
     describe('POST /api/bulletins/', function() {
         
-        it('should create a new bulletin', function(done) {
+        it('should create a new bulletin and return 201 with Location header', function(done) {
             var locationRegex = /\/api\/bulletins\/(\w+)/;
             request(HOST)
                 .post('/api/bulletins/')
@@ -159,7 +159,7 @@ describe('Bulletin API', function() {
     describe('PUT /api/bulletins', function() {
 
         var updatedBulletinLocation1;
-        it('should update bulletin title', function(done) {
+        it('should update bulletin title and return 303 with Location header', function(done) {
             request(HOST)
                 .put('/api/bulletins/' + createdBulletin)
                 .set('Content-Type', 'application/json')
@@ -176,7 +176,7 @@ describe('Bulletin API', function() {
                 });
         });
 
-        it('should have updated title', function(done) {
+        it('should have updated the bulletin title', function(done) {
             request(HOST)
                 .get(updatedBulletinLocation1)
                 .set('Accept', 'application/json')
@@ -194,7 +194,7 @@ describe('Bulletin API', function() {
         });
 
         var updatedBulletinLocation2;
-        it('should update bulletin text', function(done) {
+        it('should update bulletin text and return 303 with Location header', function(done) {
             request(HOST)
                 .put('/api/bulletins/' + createdBulletin)
                 .set('Content-Type', 'application/json')
@@ -211,7 +211,7 @@ describe('Bulletin API', function() {
                 });
         });
 
-        it('should have updated text', function(done) {
+        it('should have updated the bulletin text', function(done) {
             request(HOST)
                 .get(updatedBulletinLocation2)
                 .set('Accept', 'application/json')
@@ -231,7 +231,7 @@ describe('Bulletin API', function() {
 
     describe('DELETE /api/bulletins', function() {
 
-        it('should delete bulletins', function(done) {
+        it('should delete a bulletin', function(done) {
             request(HOST)
                 .del('/api/bulletins/' + createdBulletin)
                 .expect(204)
@@ -245,9 +245,93 @@ describe('Bulletin API', function() {
         });
     });
 
-    describe('Call /api/bulletins/ using wrong HTTP verbs', function() {
+    describe('request to invalid URL', function() {
+        it('should return 404 for GET when id is invalid', function(done) {
+            request(HOST)
+                .get('/api/bulletins/trolololol')
+                .expect(404)
+                .end(function(err) {
+                    if (err) {
+                        return done(err);
+                    }
 
-        it('should return 405 if we PUT to /api/bulletins/', function(done) {
+                    done();
+                });
+        });
+
+        it('should return 404 for GET when id is unknown', function(done) {
+            request(HOST)
+                .get('/api/bulletins/3qxOznVBVqHwY2jPE6WZ')
+                .expect(404)
+                .end(function(err) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    done();
+                });
+        });
+
+        it('should return 404 for PUT when id is invalid', function(done) {
+            request(HOST)
+                .put('/api/bulletins/trolololol')
+                .set('Content-Type', 'application/json')
+                .send('{"text":"Updated text"}')
+                .expect(404)
+                .end(function(err) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    done();
+                });
+        });
+
+        it('should return 404 for PUT when id is unknown', function(done) {
+            request(HOST)
+                .put('/api/bulletins/3qxOznVBVqHwY2jPE6WZ')
+                .set('Content-Type', 'application/json')
+                .send('{"text":"Updated text"}')
+                .expect(404)
+                .end(function(err) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    done();
+                });
+        });
+
+        it('should return 404 for DELETE when id is invalid', function(done) {
+            request(HOST)
+                .del('/api/bulletins/trolololol')
+                .expect(404)
+                .end(function(err) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    done();
+                });
+        });
+
+        it('should return 404 for DELETE when id is unknown', function(done) {
+            request(HOST)
+                .del('/api/bulletins/3qxOznVBVqHwY2jPE6WZ')
+                .expect(404)
+                .end(function(err) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    done();
+                });
+        });
+    });
+
+    describe('call to /api/bulletins/ using wrong HTTP verbs', function() {
+
+        it('should return 405 for PUT', function(done) {
             request(HOST)
                 .put('/api/bulletins/')
                 .send('{"title":"New bulletin", "text":"New text"}')
@@ -263,7 +347,7 @@ describe('Bulletin API', function() {
                 });
         });
 
-        it('should return 405 if we send DELETE to /api/bulletins/', function(done) {
+        it('should return 405 for DELETE', function(done) {
             request(HOST)
                 .del('/api/bulletins/')
                 .expect(405)
@@ -288,6 +372,60 @@ describe('Bulletin API', function() {
                     }
 
                     response.body.should.have.lengthOf(3);
+                    done();
+                });
+        });
+    });
+
+    describe('call to /api/bulletins/:id using wrong HTTP verbs', function() {
+        var createdBulletin;
+
+        before(function(done) {
+            var locationRegex = /\/api\/bulletins\/(\w+)/;
+            request(HOST)
+                .post('/api/bulletins/')
+                .set('Content-Type', 'application/json')
+                .send(BULLETIN)
+                .expect(201)
+                .expect('Location', locationRegex)
+                .end(function(err, res) {
+                        if (err) {
+                            return done(err);
+                        }
+
+                        var reg = locationRegex.exec(res.get('Location'));
+                        createdBulletin = reg[1];
+                        done();
+                    });
+        });
+
+        it('should return 405 for POST', function(done) {
+            request(HOST)
+                .post('/api/bulletins/' + createdBulletin)
+                .set('Content-Type', 'application/json')
+                .send(BULLETIN)
+                .expect(405)
+                .end(function(err) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    done();
+                });
+        });
+
+        it('should return 4 bulletins', function(done) {
+            request(HOST)
+                .get('/api/bulletins/')
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end(function(err, response) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    response.body.should.have.lengthOf(4);
                     done();
                 });
         });
