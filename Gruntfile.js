@@ -450,11 +450,6 @@ module.exports = function (grunt) {
         ]);
     });
 
-    grunt.registerTask('server', function () {
-        grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');
-        grunt.task.run(['serve']);
-    });
-
     grunt.registerTask('test', [
         'clean:server',
         'concurrent:test',
@@ -482,11 +477,6 @@ module.exports = function (grunt) {
         'rev',
         'usemin'
     ]);
-
-    grunt.registerTask('heroku', function () {
-        grunt.log.warn('The `heroku` task has been deprecated. Use `grunt build` to build for deployment.');
-        grunt.task.run(['build']);
-    });
 
     grunt.registerTask('default', [
         'newer:jshint',
