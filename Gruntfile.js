@@ -381,6 +381,10 @@ module.exports = function (grunt) {
             unit: {
                 configFile: 'karma.conf.js',
                 background: true
+            },
+            continuous: {
+                singleRun: true,
+                browsers: ['PhantomJS']
             }
         },
         mochaTest: {
