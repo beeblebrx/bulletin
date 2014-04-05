@@ -12,7 +12,7 @@ describe('Controller: MainCtrl', function () {
     // Initialize the controller and a mock scope
     beforeEach(inject(function (_$httpBackend_, $controller, $rootScope) {
         $httpBackend = _$httpBackend_;
-        $httpBackend.expectGET('/api/bulletins/all')
+        $httpBackend.expectGET('/api/bulletins/')
             .respond(['Bulletin 1', 'Bulletin 2', 'Bulletin 3', 'Bulletin 4']);
         scope = $rootScope.$new();
         MainCtrl = $controller('MainCtrl', {
