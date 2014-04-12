@@ -131,6 +131,80 @@ describe('Bulletin API', function() {
                         done();
                     });
         });
+
+        it('should reject empty bulletin with 400', function(done) {
+            request(HOST)
+                .post('/api/bulletins/')
+                .set('Content-Type', 'application/json')
+                .send({})
+                .expect(400)
+                .end(function(err, res) {
+                        if (err) {
+                            return done(err);
+                        }
+
+                        done();
+                    });
+        });
+
+        it('should reject invalid JSON with 400', function(done) {
+            request(HOST)
+                .post('/api/bulletins/')
+                .set('Content-Type', 'application/json')
+                .send('{"asdasdasasd"}')
+                .expect(400)
+                .end(function(err, res) {
+                        if (err) {
+                            return done(err);
+                        }
+
+                        done();
+                    });
+        });
+
+        it('should reject bulletin JSON that has too many properties', function(done) {
+            request(HOST)
+                .post('/api/bulletins/')
+                .set('Content-Type', 'application/json')
+                .send({'title':'New bulletin', 'text':'Text', 'extra':'Extra property'})
+                .expect(400)
+                .end(function(err, res) {
+                        if (err) {
+                            return done(err);
+                        }
+
+                        done();
+                    });
+        });
+
+        it('should reject bulletin JSON that has an invalid property', function(done) {
+            request(HOST)
+                .post('/api/bulletins/')
+                .set('Content-Type', 'application/json')
+                .send({'title':'New bulletin', 'texti':'Text'})
+                .expect(400)
+                .end(function(err, res) {
+                        if (err) {
+                            return done(err);
+                        }
+
+                        done();
+                    });
+        });
+
+        it('should reject an attempt to create a bulletin with no JSON at all', function(done) {
+            request(HOST)
+                .post('/api/bulletins/')
+                .set('Content-Type', 'application/json')
+                .expect(400)
+                .end(function(err, res) {
+                        if (err) {
+                            return done(err);
+                        }
+
+                        done();
+                    });
+        });
     });
 
     describe('GET /api/bulletins/:id', function() {
