@@ -48,6 +48,7 @@ describe('Bulletin API', function() {
         // Populate empty DB with test data
         var configPath = path.join(config.root, 'lib/config');
         var testBulletins = require(configPath + '/dummydata').initBulletins;
+        require(configPath + '/dummydata').initSettings();
         testBulletins(done);
     });
 

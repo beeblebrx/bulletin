@@ -42,5 +42,15 @@ app.listen(config.port, function () {
     console.log('Express server listening on port %d in %s mode', config.port, app.get('env'));
 });
 
+var Settings = mongoose.model('Settings');
+Settings.findOne({'_id': 1}, function(err, s) {
+    if (err) {
+        console.log(err);
+        return err;
+    }
+
+    GLOBAL.APP_SETTINGS = s;
+});
+
 // Expose app
 exports = module.exports = app;
