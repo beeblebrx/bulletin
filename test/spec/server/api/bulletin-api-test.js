@@ -47,9 +47,13 @@ describe('Bulletin API', function() {
 
         // Populate empty DB with test data
         var configPath = path.join(config.root, 'lib/config');
-        var testBulletins = require(configPath + '/dummydata').initBulletins;
-        require(configPath + '/dummydata').initSettings();
-        testBulletins(done);
+        var dummydata = require(configPath + '/dummydata');
+        dummydata.clearTestData()
+            .then(dummydata.initBulletins())
+            .then(dummydata.initSettings())
+            .then(dummydata.initUsers())
+            .then(done())
+            .onRejected(done(new Error('Populating DB with test data failed!')));
     });
 
     describe('GET /api/bulletins/', function() {
