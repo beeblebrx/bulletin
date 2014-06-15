@@ -6,8 +6,7 @@ var request = require('supertest'),
     mongoose = require('mongoose'),
     fs = require('fs'),
     should = require('chai').should(),
-    async =  require('async'),
-    _ = require('lodash');
+    async =  require('async');
 
 var HOST = 'http://localhost:' + process.env.PORT;
 var BULLETIN = {title:'Test bulletin',text:'Test text'};
