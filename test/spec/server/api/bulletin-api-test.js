@@ -5,7 +5,9 @@ var request = require('supertest'),
     path = require('path'),
     mongoose = require('mongoose'),
     fs = require('fs'),
-    should = require('chai').should();
+    should = require('chai').should,
+    async =  require('async'),
+    _ = require('lodash');
 
 var HOST = 'http://localhost:' + process.env.PORT;
 var BULLETIN = {title:'Test bulletin',text:'Test text'};
@@ -48,12 +50,20 @@ describe('Bulletin API', function() {
         // Populate empty DB with test data
         var configPath = path.join(config.root, 'lib/config');
         var dummydata = require(configPath + '/dummydata');
-        dummydata.clearTestData()
-            .then(dummydata.initBulletins())
-            .then(dummydata.initSettings())
-            .then(dummydata.initUsers())
-            .then(done())
-            .onRejected(done(new Error('Populating DB with test data failed!')));
+
+        // First drop all test collections, then populate them with test data.
+        var dbHelper = require('../../../helpers/drop_collections');
+        dbHelper.dropCollections(mongoose, function(err) {
+            dummydata.initBulletins()
+                .then(dummydata.initSettings())
+                .then(dummydata.initUsers())
+                .onFulfill(function() {
+                    done();
+                })
+                .onReject(function(err) {
+                    done(err);
+                });
+        });
     });
 
     describe('GET /api/bulletins/', function() {
