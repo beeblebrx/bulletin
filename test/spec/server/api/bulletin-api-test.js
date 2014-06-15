@@ -5,7 +5,7 @@ var request = require('supertest'),
     path = require('path'),
     mongoose = require('mongoose'),
     fs = require('fs'),
-    should = require('chai').should,
+    should = require('chai').should(),
     async =  require('async'),
     _ = require('lodash');
 
