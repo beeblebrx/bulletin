@@ -11,7 +11,8 @@
     "mongoose": "3.8.11",
     "mongoose-unique-validator": "~0.3.0",
     "passport": "latest",
-    "passport-local": "latest"
+    "passport-local": "latest",
+    "q": "^1.0.1"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
