@@ -17,6 +17,7 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-karma');
+    grunt.loadNpmTasks('grunt-bower-install');
 
     // Define the configuration for all the tasks
     grunt.initConfig({
@@ -158,13 +159,15 @@ module.exports = function (grunt) {
             }
         },
 
-        // Automatically inject Bower components into the app
-        'bower-install': {
-            app: {
-                html: '<%= yeoman.app %>/views/index.html',
-                ignorePath: '<%= yeoman.app %>/',
-                exclude: ['bootstrap-sass']
-            }
+        bowerInstall: {
+            target: {
+
+            // Point to the files that should be updated when
+            // you run `grunt bower-install`
+            src: ['<%= yeoman.app %>/views/index.html'],
+            exclude: ['bootstrap-sass'],
+            ignorePath: '<%= yeoman.app %>/'
+          }
         },
 
         // Compiles Sass to CSS and generates necessary files if requested
@@ -444,7 +447,7 @@ module.exports = function (grunt) {
 
         grunt.task.run([
             'clean:server',
-            'bower-install',
+            'bowerInstall',
             'concurrent:server',
             'autoprefixer',
             'express:dev',
@@ -468,7 +471,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('build', [
         'clean:dist',
-        'bower-install',
+        'bowerInstall',
         'useminPrepare',
         'concurrent:dist',
         'autoprefixer',
